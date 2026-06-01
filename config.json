@@ -1,13 +1,147 @@
 {
-  "items_per_day": 1,
   "categories": [
     {
-      "name": "国内",
-      "rss": "https://www3.nhk.or.jp/rss/news/cat0.xml"
+      "name": "札幌",
+      "rss": "https://www.hokkaido-np.co.jp/output/7/free/index.ad.xml",
+      "must_keywords": ["札幌"],
+      "boost_keywords": [
+        "高校",
+        "学生",
+        "学校",
+        "部活",
+        "進路",
+        "大学",
+        "就職",
+        "物価",
+        "交通",
+        "地下鉄",
+        "JR",
+        "イベント",
+        "観光",
+        "雪",
+        "災害",
+        "クマ",
+        "AI",
+        "IT",
+        "半導体",
+        "経済",
+        "スポーツ"
+      ],
+      "strong_boost_keywords": [
+        "高校生",
+        "教育",
+        "進学",
+        "奨学金",
+        "物価高",
+        "路線",
+        "大会",
+        "新球場",
+        "観光客"
+      ],
+      "avoid_keywords": [
+        "人事",
+        "訃報"
+      ]
+    },
+    {
+      "name": "北海道",
+      "rss": "https://www.hokkaido-np.co.jp/output/7/free/index.ad.xml",
+      "must_keywords": ["北海道"],
+      "boost_keywords": [
+        "高校",
+        "学生",
+        "学校",
+        "観光",
+        "農業",
+        "漁業",
+        "半導体",
+        "AI",
+        "経済",
+        "物価",
+        "交通",
+        "災害",
+        "地震",
+        "大雪",
+        "クマ",
+        "スポーツ"
+      ],
+      "strong_boost_keywords": [
+        "道内",
+        "教育",
+        "進学",
+        "就職",
+        "ラピダス",
+        "インバウンド",
+        "物価高"
+      ],
+      "avoid_keywords": [
+        "人事",
+        "訃報"
+      ]
+    },
+    {
+      "name": "全国",
+      "rss": "https://www3.nhk.or.jp/rss/news/cat0.xml",
+      "boost_keywords": [
+        "高校",
+        "教育",
+        "大学",
+        "就職",
+        "物価",
+        "経済",
+        "賃金",
+        "税",
+        "選挙",
+        "政治",
+        "AI",
+        "半導体",
+        "防災",
+        "気候",
+        "少子化"
+      ],
+      "strong_boost_keywords": [
+        "若者",
+        "学生",
+        "奨学金",
+        "進学",
+        "就職活動",
+        "円安",
+        "物価高"
+      ],
+      "avoid_keywords": [
+        "訃報"
+      ]
     },
     {
       "name": "海外",
-      "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
+      "rss": "http://feeds.bbci.co.uk/news/world/rss.xml",
+      "boost_keywords": [
+        "Japan",
+        "Asia",
+        "AI",
+        "technology",
+        "economy",
+        "climate",
+        "education",
+        "students",
+        "war",
+        "ceasefire",
+        "Middle East",
+        "China",
+        "US"
+      ],
+      "strong_boost_keywords": [
+        "Iran",
+        "Israel",
+        "Gaza",
+        "Ukraine",
+        "tariff",
+        "inflation",
+        "semiconductor"
+      ],
+      "avoid_keywords": [
+        "celebrity"
+      ]
     }
   ]
 }

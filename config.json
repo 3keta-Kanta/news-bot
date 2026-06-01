@@ -1,59 +1,8 @@
 {
-  "level": "easy",
-  "items_per_day": 1,
-
-  "default_categories": ["国内", "海外"],
-
-  "weekday_rules": {
-    "Mon": {
-      "categories": ["国内", "経済"],
-      "items_per_day": 2,
-      "level": "easy"
-    },
-    "Tue": {
-      "categories": ["海外", "経済"],
-      "items_per_day": 2,
-      "level": "easy"
-    },
-    "Wed": {
-      "categories": ["国内", "海外"],
-      "items_per_day": 2,
-      "level": "easy"
-    },
-    "Thu": {
-      "categories": ["経済", "海外"],
-      "items_per_day": 2,
-      "level": "normal"
-    },
-    "Fri": {
-      "categories": ["国内", "経済"],
-      "items_per_day": 2,
-      "level": "normal"
-    },
-    "Sat": {
-      "categories": ["国内", "海外"],
-      "items_per_day": 2,
-      "level": "easy"
-    },
-    "Sun": {
-      "categories": ["海外", "経済"],
-      "items_per_day": 2,
-      "level": "easy"
-    }
-  },
-
   "categories": [
     {
       "name": "国内",
       "rss": "https://www3.nhk.or.jp/rss/news/cat0.xml"
-    },
-    {
-      "name": "経済",
-      "rss": "https://www3.nhk.or.jp/rss/news/cat5.xml"
-    },
-    {
-      "name": "海外",
-      "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
     }
   ]
 }

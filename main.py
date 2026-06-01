@@ -1,44 +1,38 @@
 import os
 import json
 import time
-import html
-import re
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
 import feedparser
 import requests
-
-JST = ZoneInfo("Asia/Tokyo")
 
 LINE_TOKEN = os.getenv("LINE_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-def clean_text(text: str) -> str:
-    if not text:
-        return ""
-    text = html.unescape(text)
-    text = re.sub(r"<[^>]+>", "", text)
-    return text.strip()
 
-def shorten(text, max_len):
-    if len(text) <= max_len:
-        return text
-    return text[:max_len] + "..."
+def load_config():
+    with open("config.json", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_prompt():
+    with open("prompt.txt", encoding="utf-8") as f:
+        return f.read()
+
 
 def fetch_news(rss):
     feed = feedparser.parse(rss)
     if not feed.entries:
         return None
+
     e = feed.entries[0]
     return {
-        "title": clean_text(e.title),
-        "summary": clean_text(e.summary),
+        "title": e.title,
+        "summary": e.summary,
         "link": e.link
     }
 
-def call_openai(title, summary):
+
+def call_openai(prompt, title, summary):
     url = "https://api.openai.com/v1/chat/completions"
 
     headers = {
@@ -46,39 +40,23 @@ def call_openai(title, summary):
         "Content-Type": "application/json"
     }
 
-    prompt = f"""
-高校1年生向けにわかりやすく説明してください。
-
-・短く
-・やさしく
-・各項目1〜2文
-
-▼何があった？
-▼かんたん解説
-▼なぜ大事？
-▼考えてみよう
-
-ニュース:
-{title}
-{summary}
-"""
+    full_prompt = prompt + f"\n\nニュース:\n{title}\n{summary}"
 
     body = {
         "model": OPENAI_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": full_prompt}],
         "temperature": 0.5
     }
 
     res = requests.post(url, headers=headers, json=body)
     res.raise_for_status()
 
-    text = res.json()["choices"][0]["message"]["content"]
-    return text
+    return res.json()["choices"][0]["message"]["content"]
 
-def fallback(title, summary):
-    return f"""
-▼何があった？
-{shorten(summary, 60)}
+
+def fallback(summary):
+    return f"""▼何があった？
+{summary[:60]}...
 
 ▼かんたん解説
 生活に関係するニュースです。
@@ -89,6 +67,7 @@ def fallback(title, summary):
 ▼考えてみよう
 あなたはどう思う？
 """
+
 
 def send_line(messages):
     url = "https://api.line.me/v2/bot/message/broadcast"
@@ -103,31 +82,33 @@ def send_line(messages):
     }
 
     res = requests.post(url, headers=headers, json=payload)
+
     print("Status:", res.status_code)
     print("Response:", res.text)
 
+
 def main():
-    with open("config.json", encoding="utf-8") as f:
-        config = json.load(f)
+    config = load_config()
+    prompt = load_prompt()
 
-    today = datetime.now(JST)
+    category_list = config["categories"]
 
-    category = config["categories"][0]  # ★まず1件だけに固定
+    messages = []
 
-    news = fetch_news(category["rss"])
+    for cat in category_list[:config["items_per_day"]]:
+        news = fetch_news(cat["rss"])
 
-    if not news:
-        send_line(["ニュース取得失敗"])
-        return
+        if not news:
+            continue
 
-    try:
-        ai_text = call_openai(news["title"], news["summary"])
-        time.sleep(5)  # ★ここ重要（絶対入れる）
-    except Exception as e:
-        print("AI失敗:", e)
-        ai_text = fallback(news["title"], news["summary"])
+        try:
+            ai_text = call_openai(prompt, news["title"], news["summary"])
+            time.sleep(10)
+        except Exception as e:
+            print("AI失敗:", e)
+            ai_text = fallback(news["summary"])
 
-    msg = f"""【{category['name']}】
+        msg = f"""【{cat['name']}】
 {news['title']}
 
 {ai_text}
@@ -135,11 +116,11 @@ def main():
 ▼リンク
 {news['link']}"""
 
-    header = f"""【今日のニュース】
-{today.strftime('%Y/%m/%d')}
-"""
+        messages.append(msg)
 
-    send_line([header, msg])
+    header = "【今日のニュース】"
+    send_line([header] + messages)
+
 
 if __name__ == "__main__":
     main()

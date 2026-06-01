@@ -2,6 +2,7 @@ import os
 import json
 import html
 import re
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -307,6 +308,7 @@ def main():
                 title=article["title"],
                 summary=article["summary"]
             )
+            time.sleep(2)
         except Exception as e:
             print(f"[WARN] AI整形に失敗したためフォールバックします: {e}")
             formatted = fallback_format(

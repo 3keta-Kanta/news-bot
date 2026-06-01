@@ -3,7 +3,6 @@ import json
 import time
 import html
 import re
-from typing import List, Optional
 
 import feedparser
 import requests
@@ -14,33 +13,39 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
-def load_json(path: str) -> dict:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def load_text(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def clean_text(text: str) -> str:
-    if not text:
-        return ""
+def clean(text):
     text = html.unescape(text)
-    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub("<.*?>", "", text)
     return text.strip()
 
 
-def fetch_entries(rss_url: str):
-    feed = feedparser.parse(rss_url)
-    return getattr(feed, "entries", [])
+def fetch_entries(rss):
+    feed = feedparser.parse(rss)
+    return feed.entries if feed.entries else []
 
 
-def choose_entry(entries):
-    if not entries:
-        return None
-    return entries[0]
+# ✅ 使った記事を記録して重複防止
+used_links = set()
+
+
+def choose_entry(entries, category):
+    for e in entries:
+        link = e.link
+        text = e.title + getattr(e, "summary", "")
+
+        # 重複回避
+        if link in used_links:
+            continue
+
+        # keyword条件
+        if "keywords" in category:
+            if not any(k in text for k in category["keywords"]):
+                continue
+
+        used_links.add(link)
+        return e
+
+    return None
 
 
 def call_openai(prompt, title, summary):
@@ -70,10 +75,10 @@ def fallback(summary):
 {summary[:60]}...
 
 ▼かんた解説
-ちょっとむずかしそうでも大事なニュースだワン。
+ちょっとむずかしいけど生活につながる話だワン。
 
 ▼なぜ大事？
-生活や将来に関係するかもしれないワン。
+社会の流れを知るきっかけになるワン。
 
 ▼考えてみよう
 これ、自分の生活とどうつながりそう？"""
@@ -97,16 +102,17 @@ def send_line(messages):
     print("Response:", res.text)
 
 
-def process_category(category, prompt):
-    entries = fetch_entries(category["rss"])
-
+def process_category(cat, prompt):
+    entries = fetch_entries(cat["rss"])
     if not entries:
         return None
 
-    e = choose_entry(entries)
+    e = choose_entry(entries, cat)
+    if not e:
+        return None
 
-    title = clean_text(e.title)
-    summary = clean_text(getattr(e, "summary", e.title))
+    title = clean(e.title)
+    summary = clean(getattr(e, "summary", title))
 
     try:
         ai_text = call_openai(prompt, title, summary)
@@ -115,7 +121,7 @@ def process_category(category, prompt):
         print("AI失敗:", ex)
         ai_text = fallback(summary)
 
-    return f"""【{category['name']}】
+    return f"""【{cat['name']}】
 {title}
 
 {ai_text}
@@ -125,8 +131,11 @@ def process_category(category, prompt):
 
 
 def main():
-    config = load_json("config.json")
-    prompt = load_text("prompt.txt")
+    with open("config.json", encoding="utf-8") as f:
+        config = json.load(f)
+
+    with open("prompt.txt", encoding="utf-8") as f:
+        prompt = f.read()
 
     messages = ["【今日のニュース（かんた🐕）】"]
 

@@ -1,0 +1,21 @@
+name: Daily News
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 21 * * *'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install
+        run: pip install -r requirements.txt
+
+      - name: execute
+        run: python main.py
+        env:
+          LINE_TOKEN: ${{ secrets.LINE_TOKEN }}

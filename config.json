@@ -1,6 +1,6 @@
 {
   "level": "easy",
-  "items_per_day": 2,
+  "items_per_day": 1,
 
   "default_categories": ["国内", "海外"],
 

@@ -1,8 +1,13 @@
 {
+  "items_per_day": 1,
   "categories": [
     {
       "name": "国内",
       "rss": "https://www3.nhk.or.jp/rss/news/cat0.xml"
+    },
+    {
+      "name": "海外",
+      "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
     }
   ]
 }

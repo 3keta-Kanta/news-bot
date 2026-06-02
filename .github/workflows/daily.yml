@@ -3,7 +3,8 @@ name: Daily News
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 21 * * *'  # JST 06:00
+#    - cron: '0 21 * * *'  # JST 06:00
+    - cron: '*/5 * * * *'  # JST 06:00
 
 jobs:
   run:

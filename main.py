@@ -3,6 +3,7 @@ import json
 import time
 import html
 import re
+from datetime import datetime
 
 import feedparser
 import requests
@@ -24,7 +25,7 @@ def fetch_entries(rss):
     return feed.entries if feed.entries else []
 
 
-# ✅ 使った記事を記録して重複防止
+# ✅ 重複防止
 used_links = set()
 
 
@@ -33,11 +34,10 @@ def choose_entry(entries, category):
         link = e.link
         text = e.title + getattr(e, "summary", "")
 
-        # 重複回避
         if link in used_links:
             continue
 
-        # keyword条件
+        # ローカルフィルタ
         if "keywords" in category:
             if not any(k in text for k in category["keywords"]):
                 continue
@@ -71,16 +71,16 @@ def call_openai(prompt, title, summary):
 
 
 def fallback(summary):
-    return f"""▼何があった？
+    return f"""🐾何があった？
 {summary[:60]}...
 
-▼かんた解説
-ちょっとむずかしいけど生活につながる話だワン。
+🐕かんたの簡単解説
+ちょっとむずかしいけど、生活につながる話だよ。
 
-▼なぜ大事？
-社会の流れを知るきっかけになるワン。
+⭐なぜ大事？
+社会の流れを知るきっかけになる。
 
-▼考えてみよう
+💭考えてみよう
 これ、自分の生活とどうつながりそう？"""
 
 
@@ -137,7 +137,12 @@ def main():
     with open("prompt.txt", encoding="utf-8") as f:
         prompt = f.read()
 
-    messages = ["【今日のニュース（かんた🐕）】"]
+    # ✅ 日付追加
+    now = datetime.now()
+    date_str = now.strftime("%-m/%-d(%a)")
+
+    header = f"【{date_str}のニュース（かんた🐕‍🦺）】"
+    messages = [header]
 
     for cat in config["categories"]:
         msg = process_category(cat, prompt)

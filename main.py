@@ -30,22 +30,37 @@ used_links = set()
 
 
 def choose_entry(entries, category):
+    local_candidates = []
+    regional_candidates = []
+    other_candidates = []
+
     for e in entries:
         link = e.link
-        text = e.title + getattr(e, "summary", "")
-
         if link in used_links:
             continue
 
-        # ローカルフィルタ
-        if "keywords" in category:
-            if not any(k in text for k in category["keywords"]):
-                continue
+        text = e.title + getattr(e, "summary", "")
 
-        used_links.add(link)
-        return e
+        if any(k in text for k in category.get("must_keywords", [])):
+            local_candidates.append(e)
+        elif any(k in text for k in category.get("regional_keywords", [])):
+            regional_candidates.append(e)
+        else:
+            other_candidates.append(e)
 
-    return None
+    selected = None
+
+    if local_candidates:
+        selected = local_candidates[0]
+    elif regional_candidates:
+        selected = regional_candidates[0]
+    elif other_candidates:
+        selected = other_candidates[0]
+
+    if selected:
+        used_links.add(selected.link)
+
+    return selected
 
 
 def call_openai(prompt, title, summary):
